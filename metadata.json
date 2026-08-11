@@ -1,0 +1,6 @@
+{
+  "name": "Kri/Dar - Rental Marketplace Algeria",
+  "description": "Trusted rental marketplace for finding apartments, houses, studios, and rooms in Algeria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
