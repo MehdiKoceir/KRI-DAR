@@ -46,6 +46,20 @@ fun SearchScreen(
     var onlyVerified by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
 
+    val categories = listOf(
+        PropertyCategory.STUDIO to "Studio",
+        PropertyCategory.F1 to "F1",
+        PropertyCategory.F2 to "F2",
+        PropertyCategory.F3 to "F3",
+        PropertyCategory.F4 to "F4",
+        PropertyCategory.F5 to "F5+",
+        PropertyCategory.VILLA to "Villa",
+        PropertyCategory.DUPLEX to "Duplex",
+        PropertyCategory.HOUSE to "Maison",
+        PropertyCategory.APARTMENT to "Appartement",
+        PropertyCategory.COMMERCIAL to "Commercial"
+    )
+
     val filteredList = remember(
         properties, searchQuery, selectedCategory, selectedRentalType,
         maxPriceDzd, minBedrooms, onlyFurnished, onlyVerified
@@ -56,7 +70,16 @@ fun SearchScreen(
                     prop.wilaya.contains(searchQuery, ignoreCase = true) ||
                     prop.commune.contains(searchQuery, ignoreCase = true) ||
                     prop.neighborhood.contains(searchQuery, ignoreCase = true)
-            val matchCategory = selectedCategory == null || prop.category == selectedCategory
+            val matchCategory = selectedCategory == null || prop.category == selectedCategory ||
+                    (selectedCategory == PropertyCategory.APARTMENT && prop.category in listOf(
+                        PropertyCategory.APARTMENT,
+                        PropertyCategory.STUDIO,
+                        PropertyCategory.F1,
+                        PropertyCategory.F2,
+                        PropertyCategory.F3,
+                        PropertyCategory.F4,
+                        PropertyCategory.F5
+                    ))
             val matchRental = selectedRentalType == null || prop.rentalType == selectedRentalType
             val matchPrice = prop.priceDzd <= maxPriceDzd
             val matchBeds = prop.bedrooms >= minBedrooms
@@ -154,6 +177,37 @@ fun SearchScreen(
                                 selectedLabelColor = Color.White
                             )
                         )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Categories Horizontal Row (Studio, F1, F2, F3, F4, F5, Villa, etc.)
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            FilterChip(
+                                selected = selectedCategory == null,
+                                onClick = { selectedCategory = null },
+                                label = { Text("Tous types", fontSize = 12.sp, fontWeight = FontWeight.SemiBold) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = OrangeAccent,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
+                        items(categories) { (cat, name) ->
+                            FilterChip(
+                                selected = selectedCategory == cat,
+                                onClick = { selectedCategory = if (selectedCategory == cat) null else cat },
+                                label = { Text(name, fontSize = 12.sp, fontWeight = FontWeight.SemiBold) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = OrangeAccent,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -296,6 +350,44 @@ fun SearchScreen(
                     steps = 18,
                     colors = SliderDefaults.colors(thumbColor = OrangeAccent, activeTrackColor = OrangeAccent)
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Property Category Selector (Studio, F1, F2, F3, F4, F5, etc.)
+                Text(
+                    text = "Type de bien / Catégorie:",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    item {
+                        FilterChip(
+                            selected = selectedCategory == null,
+                            onClick = { selectedCategory = null },
+                            label = { Text("Tous") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = IndigoPrimary,
+                                selectedLabelColor = Color.White
+                            )
+                        )
+                    }
+                    items(categories) { (cat, name) ->
+                        FilterChip(
+                            selected = selectedCategory == cat,
+                            onClick = { selectedCategory = if (selectedCategory == cat) null else cat },
+                            label = { Text(name) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = IndigoPrimary,
+                                selectedLabelColor = Color.White
+                            )
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 

@@ -2,6 +2,8 @@ package com.example.ui.screens.landlord
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +32,7 @@ fun AddPropertyScreen(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var priceInput by remember { mutableStateOf("85000") }
-    var category by remember { mutableStateOf(PropertyCategory.APARTMENT) }
+    var category by remember { mutableStateOf(PropertyCategory.F3) }
     var rentalType by remember { mutableStateOf(RentalType.MONTHLY) }
     var wilaya by remember { mutableStateOf("Blida") }
     var commune by remember { mutableStateOf("Ouled Yaich") }
@@ -42,6 +44,22 @@ fun AddPropertyScreen(
     var hasHeating by remember { mutableStateOf(true) }
     var hasAc by remember { mutableStateOf(true) }
     var isFamilyOnly by remember { mutableStateOf(true) }
+
+    val availableCategories = listOf(
+        PropertyCategory.STUDIO to "Studio",
+        PropertyCategory.F1 to "F1",
+        PropertyCategory.F2 to "F2",
+        PropertyCategory.F3 to "F3",
+        PropertyCategory.F4 to "F4",
+        PropertyCategory.F5 to "F5+",
+        PropertyCategory.VILLA to "Villa",
+        PropertyCategory.DUPLEX to "Duplex",
+        PropertyCategory.HOUSE to "Maison",
+        PropertyCategory.APARTMENT to "Appartement",
+        PropertyCategory.COMMERCIAL to "Commercial",
+        PropertyCategory.OFFICE to "Bureau",
+        PropertyCategory.ROOM to "Chambre"
+    )
 
     Scaffold(
         topBar = {
@@ -92,6 +110,65 @@ fun AddPropertyScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text("Category / Type de bien", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(availableCategories) { (cat, name) ->
+                    FilterChip(
+                        selected = category == cat,
+                        onClick = {
+                            category = cat
+                            when (cat) {
+                                PropertyCategory.STUDIO -> {
+                                    bedroomsInput = "1"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "38"
+                                }
+                                PropertyCategory.F1 -> {
+                                    bedroomsInput = "1"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "45"
+                                }
+                                PropertyCategory.F2 -> {
+                                    bedroomsInput = "1"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "65"
+                                }
+                                PropertyCategory.F3 -> {
+                                    bedroomsInput = "2"
+                                    if (surfaceInput.isBlank()) surfaceInput = "90"
+                                }
+                                PropertyCategory.F4 -> {
+                                    bedroomsInput = "3"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "115"
+                                }
+                                PropertyCategory.F5 -> {
+                                    bedroomsInput = "4"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "150"
+                                }
+                                PropertyCategory.VILLA -> {
+                                    bedroomsInput = "5"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "250"
+                                }
+                                PropertyCategory.DUPLEX -> {
+                                    bedroomsInput = "3"
+                                    if (surfaceInput.isBlank() || surfaceInput == "95") surfaceInput = "160"
+                                }
+                                else -> {}
+                            }
+                        },
+                        label = { Text(name, fontWeight = if (category == cat) FontWeight.Bold else FontWeight.Normal) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = OrangeAccent,
+                            selectedLabelColor = Color.White
+                        )
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -192,7 +269,14 @@ fun AddPropertyScreen(
                         surfaceM2 = surfaceInput.toIntOrNull() ?: 90,
                         bedrooms = bedroomsInput.toIntOrNull() ?: 2,
                         bathrooms = bathroomsInput.toIntOrNull() ?: 1,
-                        totalRooms = (bedroomsInput.toIntOrNull() ?: 2) + 1,
+                        totalRooms = when (category) {
+                            PropertyCategory.STUDIO, PropertyCategory.F1 -> 1
+                            PropertyCategory.F2 -> 2
+                            PropertyCategory.F3 -> 3
+                            PropertyCategory.F4 -> 4
+                            PropertyCategory.F5 -> 5
+                            else -> (bedroomsInput.toIntOrNull() ?: 2) + 1
+                        },
                         imageResNames = listOf("img_property_algiers_f3_1786376194767", "img_property_bab_ezzouar_f2_1786376266050"),
                         isFurnished = isFurnished,
                         hasParking = hasParking,

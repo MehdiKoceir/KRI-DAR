@@ -117,7 +117,16 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 val matchCommune = filter.commune.isNullOrBlank() || filter.commune.equals("All", ignoreCase = true) || prop.commune.equals(filter.commune, ignoreCase = true)
                 val matchMinPrice = filter.minPriceDzd == null || prop.priceDzd >= filter.minPriceDzd
                 val matchMaxPrice = filter.maxPriceDzd == null || prop.priceDzd <= filter.maxPriceDzd
-                val matchCategory = filter.category == null || prop.category == filter.category
+                val matchCategory = filter.category == null || prop.category == filter.category ||
+                        (filter.category == PropertyCategory.APARTMENT && prop.category in listOf(
+                            PropertyCategory.APARTMENT,
+                            PropertyCategory.STUDIO,
+                            PropertyCategory.F1,
+                            PropertyCategory.F2,
+                            PropertyCategory.F3,
+                            PropertyCategory.F4,
+                            PropertyCategory.F5
+                        ))
                 val matchRentalType = filter.rentalType == null || prop.rentalType == filter.rentalType
                 val matchBedrooms = filter.minBedrooms == null || prop.bedrooms >= filter.minBedrooms
                 val matchFurnished = filter.isFurnished == null || !filter.isFurnished || prop.isFurnished
@@ -345,8 +354,13 @@ class KriDarRepository(private val db: KriDarDatabase) {
         val categoryMultiplier = when (category) {
             PropertyCategory.VILLA -> 2.2
             PropertyCategory.DUPLEX -> 1.5
-            PropertyCategory.APARTMENT, PropertyCategory.HOUSE -> 1.0
-            PropertyCategory.STUDIO -> 0.55
+            PropertyCategory.HOUSE -> 1.2
+            PropertyCategory.F5 -> 1.45
+            PropertyCategory.F4 -> 1.25
+            PropertyCategory.F3, PropertyCategory.APARTMENT -> 1.0
+            PropertyCategory.F2 -> 0.75
+            PropertyCategory.F1 -> 0.60
+            PropertyCategory.STUDIO -> 0.50
             PropertyCategory.ROOM -> 0.35
             PropertyCategory.COMMERCIAL, PropertyCategory.OFFICE -> 1.8
             PropertyCategory.OTHER -> 0.8
@@ -424,7 +438,7 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 title = "Modern F3 Apartment in High Standing Residence",
                 description = "Magnificent F3 apartment of 95 m² located in Ouled Yaich, Blida. Built in 2024, includes modern fitted kitchen, central heating, air conditioning, private garage parking, and balcony with mountain view.",
                 priceDzd = 85000.0,
-                category = PropertyCategory.APARTMENT,
+                category = PropertyCategory.F3,
                 rentalType = RentalType.MONTHLY,
                 wilaya = "Blida",
                 commune = "Ouled Yaich",
@@ -534,7 +548,7 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 title = "F4 Sea View Apartment in Cheraga",
                 description = "Spacious F4 apartment with panoramic sea view in Cheraga, Algiers. 120 m² surface area, 3 bedrooms, 2 bathrooms, modern finishings, 24/7 security guard.",
                 priceDzd = 120000.0,
-                category = PropertyCategory.APARTMENT,
+                category = PropertyCategory.F4,
                 rentalType = RentalType.MONTHLY,
                 wilaya = "Alger",
                 commune = "Cheraga",
@@ -570,7 +584,7 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 title = "F3 Apartment in Akbou Béjaïa",
                 description = "Beautiful clean F3 apartment of 88 m² in Akbou, Béjaïa. High ceiling, bright sunlit rooms, near main commercial street and schools.",
                 priceDzd = 55000.0,
-                category = PropertyCategory.APARTMENT,
+                category = PropertyCategory.F3,
                 rentalType = RentalType.FAMILY,
                 wilaya = "Béjaïa",
                 commune = "Akbou",
@@ -651,6 +665,114 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 isVerifiedProperty = false,
                 isFlaggedSuspicious = true,
                 viewsCount = 450
+            ),
+            Property(
+                id = "prop_8_f2",
+                title = "Charmant Appartement F2 Meublé à Bab Ezzouar",
+                description = "Joli F2 de 65 m² entièrement meublé et équipé. Cuisine ouverte, salon spacieux, chambre avec dressing, climatisation et chauffage central. Proche tramway et aéroport.",
+                priceDzd = 60000.0,
+                category = PropertyCategory.F2,
+                rentalType = RentalType.MONTHLY,
+                wilaya = "Alger",
+                commune = "Bab Ezzouar",
+                neighborhood = "Cité Universitaire",
+                latitude = 36.7150,
+                longitude = 3.1780,
+                surfaceM2 = 65,
+                bedrooms = 1,
+                bathrooms = 1,
+                totalRooms = 2,
+                floorLevel = 2,
+                imageResNames = listOf("img_property_bab_ezzouar_f2_1786376266050", "img_property_oran_studio_1786376255934"),
+                isFurnished = true,
+                hasParking = true,
+                hasElevator = true,
+                hasBalcony = true,
+                hasHeating = true,
+                hasAc = true,
+                hasInternet = true,
+                allowsPets = false,
+                isFamilyOnly = false,
+                isStudentFriendly = true,
+                landlordId = "landlord_karim",
+                landlordName = "Karim Ziani",
+                landlordVerification = VerificationStatus.VERIFIED,
+                isVerifiedProperty = true,
+                availableFrom = "Immediate",
+                depositMonths = 1,
+                viewsCount = 2100
+            ),
+            Property(
+                id = "prop_9_f1",
+                title = "Grand F1 Rénové au Cœur d'Alger Centre",
+                description = "Grand F1 de 45 m² refait à neuf avec goût, cuisine équipée séparée, salle d'eau moderne à l'italienne. Idéal jeune cadre ou étudiant, à 2 pas du métro Grande Poste.",
+                priceDzd = 42000.0,
+                category = PropertyCategory.F1,
+                rentalType = RentalType.MONTHLY,
+                wilaya = "Alger",
+                commune = "Alger Centre",
+                neighborhood = "Grande Poste",
+                latitude = 36.7750,
+                longitude = 3.0590,
+                surfaceM2 = 45,
+                bedrooms = 1,
+                bathrooms = 1,
+                totalRooms = 1,
+                floorLevel = 3,
+                imageResNames = listOf("img_property_oran_studio_1786376255934", "img_property_bab_ezzouar_f2_1786376266050"),
+                isFurnished = true,
+                hasParking = false,
+                hasElevator = true,
+                hasBalcony = false,
+                hasHeating = true,
+                hasAc = true,
+                hasInternet = true,
+                allowsPets = false,
+                isFamilyOnly = false,
+                isStudentFriendly = true,
+                landlordId = "landlord_karim",
+                landlordName = "Karim Ziani",
+                landlordVerification = VerificationStatus.VERIFIED,
+                isVerifiedProperty = true,
+                availableFrom = "Immediate",
+                depositMonths = 1,
+                viewsCount = 1420
+            ),
+            Property(
+                id = "prop_10_f5",
+                title = "Somptueux Appartement F5 Haut Standing à Hydra",
+                description = "Appartement F5 de 160 m² dans résidence sécurisée de haut standing avec gardiennage 24/7. Grand salon double, 4 chambres, suite parentale, cuisine italienne équipée et box de stationnement pour 2 véhicules.",
+                priceDzd = 175000.0,
+                category = PropertyCategory.F5,
+                rentalType = RentalType.FAMILY,
+                wilaya = "Alger",
+                commune = "Hydra",
+                neighborhood = "Val d'Hydra",
+                latitude = 36.7480,
+                longitude = 3.0410,
+                surfaceM2 = 160,
+                bedrooms = 4,
+                bathrooms = 2,
+                totalRooms = 5,
+                floorLevel = 2,
+                imageResNames = listOf("img_property_algiers_f3_1786376194767", "img_property_blida_villa_1786376241704"),
+                isFurnished = true,
+                hasParking = true,
+                hasElevator = true,
+                hasBalcony = true,
+                hasHeating = true,
+                hasAc = true,
+                hasInternet = true,
+                allowsPets = false,
+                isFamilyOnly = true,
+                landlordId = "agency_alger",
+                landlordName = "Casbah Premier Real Estate",
+                landlordVerification = VerificationStatus.VERIFIED,
+                isVerifiedProperty = true,
+                availableFrom = "01 Octobre 2026",
+                depositMonths = 2,
+                isFeatured = true,
+                viewsCount = 3890
             )
         )
         db.propertyDao().insertProperties(properties)

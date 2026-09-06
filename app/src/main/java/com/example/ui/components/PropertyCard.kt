@@ -118,7 +118,7 @@ fun PropertyCard(
                         contentColor = Color.White
                     ) {
                         Text(
-                            text = property.category.name,
+                            text = property.category.displayName,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

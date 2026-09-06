@@ -252,7 +252,7 @@ fun PropertyDetailScreen(
                             color = IndigoPrimaryContainer.copy(alpha = 0.2f)
                         ) {
                             Text(
-                                text = "${property.category.name} · ${property.rentalType.name}",
+                                text = "${property.category.displayName} · ${property.rentalType.name}",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = IndigoPrimary,

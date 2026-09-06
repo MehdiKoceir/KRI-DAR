@@ -9,7 +9,38 @@ enum class UserRole {
 }
 
 enum class PropertyCategory {
-    APARTMENT, HOUSE, VILLA, STUDIO, ROOM, DUPLEX, OFFICE, COMMERCIAL, OTHER
+    STUDIO,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    APARTMENT,
+    HOUSE,
+    VILLA,
+    DUPLEX,
+    ROOM,
+    OFFICE,
+    COMMERCIAL,
+    OTHER;
+
+    val displayName: String
+        get() = when (this) {
+            STUDIO -> "Studio"
+            F1 -> "F1"
+            F2 -> "F2"
+            F3 -> "F3"
+            F4 -> "F4"
+            F5 -> "F5+"
+            APARTMENT -> "Appartement"
+            HOUSE -> "Maison"
+            VILLA -> "Villa"
+            DUPLEX -> "Duplex"
+            ROOM -> "Chambre"
+            OFFICE -> "Bureau"
+            COMMERCIAL -> "Commercial"
+            OTHER -> "Autre"
+        }
 }
 
 enum class RentalType {

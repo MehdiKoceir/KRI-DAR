@@ -47,12 +47,19 @@ fun HomeScreen(
     val quickLocations = listOf("Blida", "Alger", "Oran", "Bab Ezzouar", "Ouled Yaich", "Cheraga")
 
     val categories = listOf(
-        PropertyCategory.APARTMENT to "Apartment",
-        PropertyCategory.HOUSE to "House",
-        PropertyCategory.VILLA to "Villa",
         PropertyCategory.STUDIO to "Studio",
-        PropertyCategory.ROOM to "Room",
-        PropertyCategory.COMMERCIAL to "Commercial"
+        PropertyCategory.F1 to "F1",
+        PropertyCategory.F2 to "F2",
+        PropertyCategory.F3 to "F3",
+        PropertyCategory.F4 to "F4",
+        PropertyCategory.F5 to "F5+",
+        PropertyCategory.VILLA to "Villa",
+        PropertyCategory.DUPLEX to "Duplex",
+        PropertyCategory.HOUSE to "Maison",
+        PropertyCategory.APARTMENT to "Appartement",
+        PropertyCategory.COMMERCIAL to "Commercial",
+        PropertyCategory.OFFICE to "Bureau",
+        PropertyCategory.ROOM to "Chambre"
     )
 
     val filteredProperties = remember(properties, selectedWilaya, selectedCategory) {
@@ -60,7 +67,16 @@ fun HomeScreen(
             val matchWilaya = prop.wilaya.equals(selectedWilaya, ignoreCase = true) ||
                     prop.commune.contains(selectedWilaya, ignoreCase = true) ||
                     selectedWilaya == "All Algeria"
-            val matchCategory = selectedCategory == null || prop.category == selectedCategory
+            val matchCategory = selectedCategory == null || prop.category == selectedCategory ||
+                    (selectedCategory == PropertyCategory.APARTMENT && prop.category in listOf(
+                        PropertyCategory.APARTMENT,
+                        PropertyCategory.STUDIO,
+                        PropertyCategory.F1,
+                        PropertyCategory.F2,
+                        PropertyCategory.F3,
+                        PropertyCategory.F4,
+                        PropertyCategory.F5
+                    ))
             matchWilaya && matchCategory
         }
     }
@@ -232,12 +248,19 @@ fun HomeScreen(
                         }
                         items(categories) { (cat, name) ->
                             val icon = when (cat) {
+                                PropertyCategory.STUDIO -> Icons.Default.Bed
+                                PropertyCategory.F1 -> Icons.Default.MeetingRoom
+                                PropertyCategory.F2 -> Icons.Default.MeetingRoom
+                                PropertyCategory.F3 -> Icons.Default.Apartment
+                                PropertyCategory.F4 -> Icons.Default.Apartment
+                                PropertyCategory.F5 -> Icons.Default.Apartment
                                 PropertyCategory.APARTMENT -> Icons.Default.Apartment
                                 PropertyCategory.HOUSE -> Icons.Default.Home
                                 PropertyCategory.VILLA -> Icons.Default.Villa
-                                PropertyCategory.STUDIO -> Icons.Default.Bed
+                                PropertyCategory.DUPLEX -> Icons.Default.HolidayVillage
                                 PropertyCategory.ROOM -> Icons.Default.SingleBed
                                 PropertyCategory.COMMERCIAL -> Icons.Default.Storefront
+                                PropertyCategory.OFFICE -> Icons.Default.Work
                                 else -> Icons.Default.Domain
                             }
                             CategoryPill(
