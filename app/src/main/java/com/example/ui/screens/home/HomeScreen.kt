@@ -133,12 +133,12 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(OrangeAccent)
+                                    .background(Indigo100)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Map,
                                     contentDescription = "Map view",
-                                    tint = Color.White,
+                                    tint = IndigoPrimary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -326,9 +326,9 @@ fun HomeScreen(
             // Trust Banner
             item {
                 Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = VerificationGreenLight.copy(alpha = 0.6f)),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, VerificationGreen.copy(alpha = 0.2f)),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, OutlineBorder),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 6.dp)
@@ -340,27 +340,27 @@ fun HomeScreen(
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(38.dp)
+                                .size(36.dp)
                                 .clip(CircleShape)
-                                .background(VerificationGreen)
+                                .background(Indigo100)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.VerifiedUser,
                                 contentDescription = "Trust",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
+                                tint = IndigoPrimary,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "✓ Anti-Scam Verified Marketplace",
+                                text = "Verified Real Estate Marketplace",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = VerificationGreen
+                                color = TextPrimary
                             )
                             Text(
-                                text = "Every property is verified for fair price and legal landlord ownership.",
+                                text = "Fair price intelligence and verified ownership documents.",
                                 fontSize = 11.sp,
                                 color = TextSecondary
                             )

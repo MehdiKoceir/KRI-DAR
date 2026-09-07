@@ -35,7 +35,8 @@ fun SearchScreen(
     favoriteIds: List<String>,
     initialQuery: String = "",
     onPropertyClick: (String) -> Unit,
-    onFavoriteToggle: (String) -> Unit
+    onFavoriteToggle: (String) -> Unit,
+    onMapClick: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf(initialQuery) }
     var selectedCategory by remember { mutableStateOf<PropertyCategory?>(null) }
@@ -268,17 +269,41 @@ fun SearchScreen(
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
-                if (searchQuery.isNotEmpty() || selectedCategory != null || maxPriceDzd < 200000.0 || onlyVerified) {
-                    TextButton(onClick = {
-                        searchQuery = ""
-                        selectedCategory = null
-                        selectedRentalType = null
-                        maxPriceDzd = 200000.0
-                        minBedrooms = 0
-                        onlyFurnished = false
-                        onlyVerified = false
-                    }) {
-                        Text("Reset Filters", fontSize = 12.sp, color = OrangeAccent)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    FilledTonalButton(
+                        onClick = onMapClick,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = Indigo100,
+                            contentColor = IndigoPrimary
+                        ),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier
+                            .height(34.dp)
+                            .testTag("search_view_on_map_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = "Map view",
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Carte", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    if (searchQuery.isNotEmpty() || selectedCategory != null || maxPriceDzd < 200000.0 || onlyVerified) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        TextButton(onClick = {
+                            searchQuery = ""
+                            selectedCategory = null
+                            selectedRentalType = null
+                            maxPriceDzd = 200000.0
+                            minBedrooms = 0
+                            onlyFurnished = false
+                            onlyVerified = false
+                        }) {
+                            Text("Reset", fontSize = 12.sp, color = IndigoPrimary)
+                        }
                     }
                 }
             }

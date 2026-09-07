@@ -2,35 +2,50 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Indigo Palette (Professional Polish Theme)
-val Indigo700 = Color(0xFF4338CA)
-val Indigo600 = Color(0xFF4F46E5)
-val Indigo500 = Color(0xFF6366F1)
-val Indigo100 = Color(0xFFE0E7FF)
-val Indigo50 = Color(0xFFEEF2FF)
+// =========================================================================
+// KriDar Palette: Clean, Harmonious Real Estate Design System
+// - Single Primary Brand: KriDar Mediterranean Navy (#0F4C81)
+// - Clean Neutrals: 90% White & Slate for high contrast and readability
+// - Semantic Statuses: Controlled Green for Verified, Red for Warnings
+// =========================================================================
 
-val IndigoPrimary = Indigo700
-val IndigoPrimaryDark = Color(0xFF312E81)
-val IndigoPrimaryContainer = Indigo100
+// Primary Brand Identity: KriDar Deep Navy
+val KriDarNavy = Color(0xFF0F4C81)
+val KriDarNavyDark = Color(0xFF092E52)
+val KriDarNavyLight = Color(0xFF1D6AA3)
+val KriDarSoftContainer = Color(0xFFEDF4FA)
 
-// Accent Warm Orange
-val OrangeAccent = Color(0xFFF97316)
-val OrangeAccentDark = Color(0xFFEA580C)
-val OrangeAccentContainer = Color(0xFFFFEDD5)
+// Primary Color & Aliases
+val IndigoPrimary = KriDarNavy
+val IndigoPrimaryDark = KriDarNavyDark
+val IndigoPrimaryContainer = KriDarSoftContainer
 
-// Trust & Verification Emerald / Green
-val EmeraldTrust = Color(0xFF0D9488)
-val EmeraldLight = Color(0xFFCCFBF1)
-val VerificationGreen = Color(0xFF16A34A)
+val Indigo700 = KriDarNavy
+val Indigo600 = KriDarNavy
+val Indigo500 = KriDarNavyLight
+val Indigo100 = KriDarSoftContainer
+val Indigo50 = Color(0xFFF4F8FC)
+
+// Unified Accent: Harmonized with brand to prevent conflicting colors across screens
+val OrangeAccent = KriDarNavy
+val OrangeAccentDark = KriDarNavyDark
+val OrangeAccentContainer = KriDarSoftContainer
+
+// Semantic Verification (Used strictly for verified badges, not UI chrome)
+val VerificationGreen = Color(0xFF15803D)
 val VerificationGreenLight = Color(0xFFDCFCE7)
+val EmeraldTrust = KriDarNavy
+val EmeraldLight = KriDarSoftContainer
 
-// Background & Surface (Professional Polish: Crisp Slate-50 background, White cards, Slate borders)
-val BackgroundLight = Color(0xFFF7F9FC)
+// Crisp Modern Neutrals
+val BackgroundLight = Color(0xFFF8FAFC)
 val SurfaceLight = Color(0xFFFFFFFF)
 val SurfaceVariantLight = Color(0xFFF1F5F9)
 
+// Borders & Typography
 val OutlineBorder = Color(0xFFE2E8F0)
 val TextPrimary = Color(0xFF0F172A)
-val TextSecondary = Color(0xFF64748B)
+val TextSecondary = Color(0xFF475569)
 val TextMuted = Color(0xFF94A3B8)
+
 

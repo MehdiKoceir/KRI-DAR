@@ -261,7 +261,8 @@ fun KriDarApp(repository: KriDarRepository) {
                                     coroutineScope.launch {
                                         repository.toggleFavorite(propId)
                                     }
-                                }
+                                },
+                                onMapClick = { currentRoute = Screen.Map.route }
                             )
                         }
 
