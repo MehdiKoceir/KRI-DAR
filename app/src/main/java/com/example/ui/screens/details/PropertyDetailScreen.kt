@@ -1,5 +1,10 @@
 package com.example.ui.screens.details
 
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+import java.net.URLEncoder
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PriceIntelligence
 import com.example.data.model.Property
+import com.example.data.model.PropertyReview
 import com.example.data.model.VerificationStatus
 import com.example.ui.components.VerificationBadge
 import com.example.ui.components.formatDzd
@@ -40,21 +46,52 @@ fun PropertyDetailScreen(
     property: Property,
     isFavorite: Boolean,
     priceIntel: PriceIntelligence,
+    reviews: List<PropertyReview> = emptyList(),
     onBackClick: () -> Unit,
     onFavoriteToggle: () -> Unit,
     onStartChat: () -> Unit,
     onRequestVisit: (date: String, time: String, visitors: Int, note: String) -> Unit,
     onReportProperty: (reason: String, details: String) -> Unit,
-    onCompareProperty: () -> Unit
+    onCompareProperty: () -> Unit,
+    onAddReview: (rating: Int, comment: String, rentalPeriod: String, cleanliness: Int, communication: Int, accuracy: Int, location: Int) -> Unit = { _, _, _, _, _, _, _ -> }
 ) {
     val context = LocalContext.current
     var selectedImageIndex by remember { mutableStateOf(0) }
     var showVisitDialog by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
+    var showContactOptionsSheet by remember { mutableStateOf(false) }
+    var showAddReviewSheet by remember { mutableStateOf(false) }
 
     val images = property.imageResNames.ifEmpty { listOf("img_property_algiers_f3_1786376194767") }
 
     Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { showContactOptionsSheet = true },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Call,
+                        contentDescription = "Contact Owner",
+                        tint = Color.White
+                    )
+                },
+                text = {
+                    Text(
+                        text = "Contacter",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                containerColor = OrangeAccent,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .testTag("fab_contact_owner")
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
             Surface(
                 color = SurfaceLight,
@@ -492,16 +529,75 @@ fun PropertyDetailScreen(
                                 }
 
                                 Text(
-                                    text = "Verified Landlord · 96% Response Rate",
+                                    text = "Propriétaire vérifié · ${property.landlordPhone}",
                                     fontSize = 12.sp,
                                     color = TextSecondary
                                 )
                                 Text(
-                                    text = "Usually responds within 15 min",
+                                    text = "⚡ Répond généralement en 15 min",
                                     fontSize = 11.sp,
                                     color = EmeraldTrust,
                                     fontWeight = FontWeight.SemiBold
                                 )
+                            }
+
+                            // Quick Contact Action Buttons
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(
+                                    onClick = {
+                                        try {
+                                            val dialIntent = Intent(Intent.ACTION_DIAL).apply {
+                                                data = Uri.parse("tel:${property.landlordPhone.replace(" ", "")}")
+                                            }
+                                            context.startActivity(dialIntent)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Impossible d'ouvrir le composeur", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(Indigo100)
+                                        .testTag("landlord_quick_call_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Phone,
+                                        contentDescription = "Appeler",
+                                        tint = IndigoPrimary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(6.dp))
+
+                                IconButton(
+                                    onClick = {
+                                        try {
+                                            val cleanPhone = property.landlordPhone
+                                                .replace("+", "")
+                                                .replace(" ", "")
+                                                .replace("-", "")
+                                            val inquiry = "Bonjour ${property.landlordName}, je vous contacte concernant votre annonce : \"${property.title}\" sur Kri/Dar."
+                                            val encoded = URLEncoder.encode(inquiry, "UTF-8")
+                                            val waIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=$cleanPhone&text=$encoded"))
+                                            context.startActivity(waIntent)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "WhatsApp non disponible", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFDCFCE7))
+                                        .testTag("landlord_quick_whatsapp_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Chat,
+                                        contentDescription = "WhatsApp",
+                                        tint = Color(0xFF16A34A),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -636,6 +732,337 @@ fun PropertyDetailScreen(
                 }
             }
         )
+    }
+
+    // Direct Contact Modal Bottom Sheet
+    if (showContactOptionsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showContactOptionsSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = SurfaceLight,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            modifier = Modifier.testTag("contact_options_bottom_sheet")
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 32.dp, top = 8.dp)
+            ) {
+                // Landlord Header Row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(54.dp)
+                            .clip(CircleShape)
+                            .background(IndigoPrimaryContainer)
+                    ) {
+                        Text(
+                            text = property.landlordName.take(1),
+                            color = IndigoPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(14.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = property.landlordName,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = "Verified",
+                                tint = VerificationGreen,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Text(
+                            text = "Propriétaire vérifié · ${property.landlordPhone}",
+                            fontSize = 13.sp,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "⚡ Répond généralement en 15 min",
+                            fontSize = 11.sp,
+                            color = VerificationGreen,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    IconButton(onClick = { showContactOptionsSheet = false }) {
+                        Icon(Icons.Default.Close, contentDescription = "Fermer", tint = TextMuted)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+                HorizontalDivider(color = OutlineBorder)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Choisir le mode de contact direct :",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Option 1: Appeler le propriétaire (Phone Call)
+                Surface(
+                    onClick = {
+                        try {
+                            val dialIntent = Intent(Intent.ACTION_DIAL).apply {
+                                data = Uri.parse("tel:${property.landlordPhone.replace(" ", "")}")
+                            }
+                            context.startActivity(dialIntent)
+                            showContactOptionsSheet = false
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Impossible d'ouvrir le composeur téléphonique", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Indigo100.copy(alpha = 0.5f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, IndigoPrimary.copy(alpha = 0.2f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("contact_action_call")
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(IndigoPrimary)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Call,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Appel Téléphonique Direct",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "${property.landlordPhone} · Ouvre l'application Téléphone",
+                                fontSize = 12.sp,
+                                color = TextSecondary
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = TextMuted
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Option 2: Message WhatsApp Direct
+                Surface(
+                    onClick = {
+                        try {
+                            val cleanPhone = property.landlordPhone
+                                .replace("+", "")
+                                .replace(" ", "")
+                                .replace("-", "")
+                            val inquiryMessage = "Bonjour ${property.landlordName}, je vous contacte depuis l'application Kri/Dar concernant votre annonce : \"${property.title}\" (${formatDzd(property.priceDzd)}/mois à ${property.commune}). Est-elle toujours disponible ?"
+                            val encodedMsg = URLEncoder.encode(inquiryMessage, "UTF-8")
+                            val whatsappUri = Uri.parse("https://api.whatsapp.com/send?phone=$cleanPhone&text=$encodedMsg")
+                            val waIntent = Intent(Intent.ACTION_VIEW, whatsappUri)
+                            context.startActivity(waIntent)
+                            showContactOptionsSheet = false
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "WhatsApp n'est pas installé sur cet appareil", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFFDCFCE7),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF86EFAC)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("contact_action_whatsapp")
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF16A34A))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Chat,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Message WhatsApp Direct",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF14532D)
+                            )
+                            Text(
+                                text = "Ouvre WhatsApp avec message pré-rempli",
+                                fontSize = 12.sp,
+                                color = Color(0xFF166534)
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = Color(0xFF16A34A)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Option 3: SMS Direct
+                Surface(
+                    onClick = {
+                        try {
+                            val smsIntent = Intent(Intent.ACTION_SENDTO).apply {
+                                data = Uri.parse("smsto:${property.landlordPhone.replace(" ", "")}")
+                                putExtra("sms_body", "Bonjour ${property.landlordName}, je vous contacte via Kri/Dar au sujet de votre location : ${property.title}.")
+                            }
+                            context.startActivity(smsIntent)
+                            showContactOptionsSheet = false
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Impossible d'ouvrir l'application SMS", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = BackgroundLight,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, OutlineBorder),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("contact_action_sms")
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFE2E8F0))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Email,
+                                contentDescription = null,
+                                tint = TextPrimary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Envoyer un SMS",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "Messagerie mobile standard",
+                                fontSize = 12.sp,
+                                color = TextSecondary
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = TextMuted
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Option 4: Chat In-App Kri/Dar
+                Surface(
+                    onClick = {
+                        showContactOptionsSheet = false
+                        onStartChat()
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = BackgroundLight,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, OutlineBorder),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("contact_action_inapp_chat")
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(Indigo100)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Forum,
+                                contentDescription = null,
+                                tint = IndigoPrimary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Chat Sécurisé Kri/Dar",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "Historique et documents conservés dans l'app",
+                                fontSize = 12.sp,
+                                color = TextSecondary
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = TextMuted
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

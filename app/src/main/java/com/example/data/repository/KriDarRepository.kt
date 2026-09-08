@@ -33,6 +33,9 @@ class KriDarRepository(private val db: KriDarDatabase) {
             if (db.propertyDao().getPropertyCount() == 0) {
                 seedDatabase()
             }
+            if (db.reviewDao().getReviewCount() == 0) {
+                seedReviews()
+            }
         }
     }
 
@@ -337,6 +340,42 @@ class KriDarRepository(private val db: KriDarDatabase) {
         val docs = db.verificationDao().getAllVerificationDocs().first()
         val doc = docs.find { it.id == docId } ?: return
         db.verificationDao().updateDoc(doc.copy(status = status))
+    }
+
+    // --- Reviews & Ratings ---
+    fun getReviewsForProperty(propertyId: String): Flow<List<PropertyReview>> =
+        db.reviewDao().getReviewsForProperty(propertyId)
+
+    suspend fun addReview(
+        propertyId: String,
+        rating: Int,
+        comment: String,
+        rentalPeriod: String = "Ancien locataire",
+        cleanliness: Int = rating,
+        communication: Int = rating,
+        accuracy: Int = rating,
+        location: Int = rating
+    ) {
+        val user = _currentUser.value
+        val newReview = PropertyReview(
+            id = UUID.randomUUID().toString(),
+            propertyId = propertyId,
+            userId = user.id,
+            userName = user.fullName,
+            userAvatar = user.avatarUrl,
+            isVerifiedTenant = true,
+            rating = rating.coerceIn(1, 5),
+            cleanlinessRating = cleanliness.coerceIn(1, 5),
+            communicationRating = communication.coerceIn(1, 5),
+            accuracyRating = accuracy.coerceIn(1, 5),
+            locationRating = location.coerceIn(1, 5),
+            comment = comment.trim(),
+            rentalPeriod = rentalPeriod,
+            reviewDate = "Aujourd'hui",
+            helpfulCount = 0,
+            createdAt = System.currentTimeMillis()
+        )
+        db.reviewDao().insertReview(newReview)
     }
 
     // --- Price Intelligence Calculator ---
@@ -836,5 +875,107 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 alertsEnabled = true
             )
         )
+    }
+
+    private suspend fun seedReviews() {
+        val initialReviews = listOf(
+            PropertyReview(
+                id = "rev_1",
+                propertyId = "prop_1",
+                userId = "user_yacine",
+                userName = "Yacine B.",
+                isVerifiedTenant = true,
+                rating = 5,
+                cleanlinessRating = 5,
+                communicationRating = 5,
+                accuracyRating = 5,
+                locationRating = 5,
+                comment = "Excellent appartement très lumineux et strictement conforme aux photos. La résidence est calme et sécurisée, eau H24 avec la bâche à eau. Le propriétaire Si Ahmed est très sérieux, disponible et réactif.",
+                rentalPeriod = "Locataire pendant 1 an",
+                reviewDate = "Août 2026",
+                helpfulCount = 4
+            ),
+            PropertyReview(
+                id = "rev_2",
+                propertyId = "prop_1",
+                userId = "user_amira",
+                userName = "Amira K.",
+                isVerifiedTenant = true,
+                rating = 5,
+                cleanlinessRating = 5,
+                communicationRating = 4,
+                accuracyRating = 5,
+                locationRating = 5,
+                comment = "Très satisfaite de la location en famille. Le quartier à Ouled Yaich est agréable avec supérette et écoles à proximité immédiate. Le chauffage central et la climatisation fonctionnent parfaitement en toutes saisons.",
+                rentalPeriod = "Séjour 8 mois",
+                reviewDate = "Juillet 2026",
+                helpfulCount = 2
+            ),
+            PropertyReview(
+                id = "rev_3",
+                propertyId = "prop_1",
+                userId = "user_sofiane",
+                userName = "Sofiane T.",
+                isVerifiedTenant = true,
+                rating = 4,
+                cleanlinessRating = 4,
+                communicationRating = 5,
+                accuracyRating = 4,
+                locationRating = 4,
+                comment = "Bel appartement bien fini avec place de parking réservée en sous-sol très pratique. Très bon contact avec le bailleur lors de l'état des lieux d'entrée et de sortie.",
+                rentalPeriod = "Contrat 1 an",
+                reviewDate = "Mai 2026",
+                helpfulCount = 1
+            ),
+            PropertyReview(
+                id = "rev_4",
+                propertyId = "prop_2",
+                userId = "user_moncef",
+                userName = "Moncef D.",
+                isVerifiedTenant = true,
+                rating = 5,
+                cleanlinessRating = 5,
+                communicationRating = 5,
+                accuracyRating = 5,
+                locationRating = 5,
+                comment = "Emplacement idéal pour étudiant ou jeune actif ! À 3 minutes à pied de la station de tramway de Bab Ezzouar. Studio meublé avec goût, très fonctionnel et bien insonorisé.",
+                rentalPeriod = "Étudiant (10 mois)",
+                reviewDate = "Juin 2026",
+                helpfulCount = 5
+            ),
+            PropertyReview(
+                id = "rev_5",
+                propertyId = "prop_2",
+                userId = "user_nabila",
+                userName = "Nabila S.",
+                isVerifiedTenant = true,
+                rating = 4,
+                cleanlinessRating = 4,
+                communicationRating = 5,
+                accuracyRating = 4,
+                locationRating = 4,
+                comment = "Studio cosy et très propre lors de la remise des clés. Propriétaire sérieux et respectueux du contrat de bail.",
+                rentalPeriod = "Séjour 6 mois",
+                reviewDate = "Mars 2026",
+                helpfulCount = 3
+            ),
+            PropertyReview(
+                id = "rev_6",
+                propertyId = "prop_3",
+                userId = "user_rachid",
+                userName = "Rachid G.",
+                isVerifiedTenant = true,
+                rating = 5,
+                cleanlinessRating = 5,
+                communicationRating = 5,
+                accuracyRating = 5,
+                locationRating = 5,
+                comment = "Vue imprenable et panoramique sur la baie d'Oran ! Prestations haut de gamme, suite parentale spacieuse et cuisine équipée dernier cri. Nous avons passé une excellente année.",
+                rentalPeriod = "Famille (1 an)",
+                reviewDate = "Juillet 2026",
+                helpfulCount = 6
+            )
+        )
+        db.reviewDao().insertReviews(initialReviews)
     }
 }

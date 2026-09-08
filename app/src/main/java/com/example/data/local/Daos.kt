@@ -150,3 +150,22 @@ interface VerificationDao {
     @Update
     suspend fun updateDoc(doc: VerificationDoc)
 }
+
+@Dao
+interface ReviewDao {
+    @Query("SELECT * FROM reviews WHERE propertyId = :propertyId ORDER BY createdAt DESC")
+    fun getReviewsForProperty(propertyId: String): Flow<List<PropertyReview>>
+
+    @Query("SELECT * FROM reviews ORDER BY createdAt DESC")
+    fun getAllReviews(): Flow<List<PropertyReview>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertReview(review: PropertyReview)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertReviews(reviews: List<PropertyReview>)
+
+    @Query("SELECT COUNT(*) FROM reviews")
+    suspend fun getReviewCount(): Int
+}
+

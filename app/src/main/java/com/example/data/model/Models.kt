@@ -113,6 +113,7 @@ data class Property(
     val landlordId: String,
     val landlordName: String,
     val landlordAvatar: String = "",
+    val landlordPhone: String = "+213 550 12 34 56",
     val landlordVerification: VerificationStatus = VerificationStatus.VERIFIED,
     val isVerifiedProperty: Boolean = true,
     val availableFrom: String = "Immediate",
@@ -245,4 +246,25 @@ data class PropertyFilter(
     val isFamilyOnly: Boolean? = null,
     val isStudentFriendly: Boolean? = null
 )
+
+@Entity(tableName = "reviews")
+data class PropertyReview(
+    @PrimaryKey val id: String,
+    val propertyId: String,
+    val userId: String,
+    val userName: String,
+    val userAvatar: String = "",
+    val isVerifiedTenant: Boolean = true,
+    val rating: Int, // 1 to 5
+    val cleanlinessRating: Int = 5,
+    val communicationRating: Int = 5,
+    val accuracyRating: Int = 5,
+    val locationRating: Int = 5,
+    val comment: String,
+    val rentalPeriod: String = "Ancien locataire", // e.g. "Contrat 1 an", "Séjour 6 mois"
+    val reviewDate: String = "Août 2026",
+    val helpfulCount: Int = 0,
+    val createdAt: Long = System.currentTimeMillis()
+) : Serializable
+
 

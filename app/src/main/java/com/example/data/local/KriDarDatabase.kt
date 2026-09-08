@@ -18,9 +18,10 @@ import com.example.data.model.*
         Message::class,
         SavedSearch::class,
         Report::class,
-        VerificationDoc::class
+        VerificationDoc::class,
+        PropertyReview::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -34,6 +35,7 @@ abstract class KriDarDatabase : RoomDatabase() {
     abstract fun savedSearchDao(): SavedSearchDao
     abstract fun reportDao(): ReportDao
     abstract fun verificationDao(): VerificationDao
+    abstract fun reviewDao(): ReviewDao
 
     companion object {
         @Volatile

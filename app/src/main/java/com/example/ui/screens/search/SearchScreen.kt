@@ -28,6 +28,12 @@ import com.example.ui.components.PropertyCard
 import com.example.ui.components.formatDzd
 import com.example.ui.theme.*
 
+enum class PropertySortOrder(val title: String, val shortLabel: String) {
+    RECENT("Plus récents", "Récents"),
+    PRICE_LOW_TO_HIGH("Prix croissant", "Prix croissant"),
+    PRICE_HIGH_TO_LOW("Prix décroissant", "Prix décroissant")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
@@ -46,6 +52,8 @@ fun SearchScreen(
     var onlyFurnished by remember { mutableStateOf(false) }
     var onlyVerified by remember { mutableStateOf(false) }
     var showFilterSheet by remember { mutableStateOf(false) }
+    var currentSort by remember { mutableStateOf(PropertySortOrder.RECENT) }
+    var showSortMenu by remember { mutableStateOf(false) }
 
     val categories = listOf(
         PropertyCategory.STUDIO to "Studio",
@@ -88,6 +96,14 @@ fun SearchScreen(
             val matchVerified = !onlyVerified || prop.isVerifiedProperty
 
             matchQuery && matchCategory && matchRental && matchPrice && matchBeds && matchFurnished && matchVerified
+        }
+    }
+
+    val sortedList = remember(filteredList, currentSort) {
+        when (currentSort) {
+            PropertySortOrder.RECENT -> filteredList.sortedByDescending { it.createdAtTimestamp }
+            PropertySortOrder.PRICE_LOW_TO_HIGH -> filteredList.sortedBy { it.priceDzd }
+            PropertySortOrder.PRICE_HIGH_TO_LOW -> filteredList.sortedByDescending { it.priceDzd }
         }
     }
 
@@ -255,7 +271,7 @@ fun SearchScreen(
                 }
             }
 
-            // Results Heading
+            // Results Heading with Sort and Map options
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -269,7 +285,76 @@ fun SearchScreen(
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    // Sort Dropdown Button
+                    Box {
+                        FilledTonalButton(
+                            onClick = { showSortMenu = true },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = SurfaceLight,
+                                contentColor = TextPrimary
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, OutlineBorder),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .height(34.dp)
+                                .testTag("sort_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Sort,
+                                contentDescription = "Trier",
+                                tint = OrangeAccent,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(currentSort.shortLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false },
+                            modifier = Modifier.background(SurfaceLight)
+                        ) {
+                            PropertySortOrder.values().forEach { sortOption ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            if (currentSort == sortOption) {
+                                                Icon(
+                                                    Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    tint = OrangeAccent,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                            }
+                                            Text(
+                                                text = sortOption.title,
+                                                fontWeight = if (currentSort == sortOption) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (currentSort == sortOption) OrangeAccent else TextPrimary
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        currentSort = sortOption
+                                        showSortMenu = false
+                                    },
+                                    modifier = Modifier.testTag("sort_option_${sortOption.name.lowercase()}")
+                                )
+                            }
+                        }
+                    }
+
+                    // Map Button
                     FilledTonalButton(
                         onClick = onMapClick,
                         shape = RoundedCornerShape(10.dp),
@@ -292,23 +377,26 @@ fun SearchScreen(
                     }
 
                     if (searchQuery.isNotEmpty() || selectedCategory != null || maxPriceDzd < 200000.0 || onlyVerified) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        TextButton(onClick = {
-                            searchQuery = ""
-                            selectedCategory = null
-                            selectedRentalType = null
-                            maxPriceDzd = 200000.0
-                            minBedrooms = 0
-                            onlyFurnished = false
-                            onlyVerified = false
-                        }) {
+                        TextButton(
+                            onClick = {
+                                searchQuery = ""
+                                selectedCategory = null
+                                selectedRentalType = null
+                                maxPriceDzd = 200000.0
+                                minBedrooms = 0
+                                onlyFurnished = false
+                                onlyVerified = false
+                                currentSort = PropertySortOrder.RECENT
+                            },
+                            contentPadding = PaddingValues(horizontal = 6.dp)
+                        ) {
                             Text("Reset", fontSize = 12.sp, color = IndigoPrimary)
                         }
                     }
                 }
             }
 
-            if (filteredList.isEmpty()) {
+            if (sortedList.isEmpty()) {
                 EmptyStateView(
                     title = "No Properties Found",
                     subtitle = "Try adjusting your search terms or relaxing your price/bedroom filters.",
@@ -321,6 +409,7 @@ fun SearchScreen(
                         minBedrooms = 0
                         onlyFurnished = false
                         onlyVerified = false
+                        currentSort = PropertySortOrder.RECENT
                     }
                 )
             } else {
@@ -329,7 +418,7 @@ fun SearchScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(filteredList) { prop ->
+                    items(sortedList) { prop ->
                         PropertyCard(
                             property = prop,
                             isFavorite = favoriteIds.contains(prop.id),
@@ -461,6 +550,33 @@ fun SearchScreen(
                     Text("Verified Landlords & Listings only", fontSize = 14.sp)
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Sorting Order
+                Text(
+                    text = "Trier les résultats :",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    PropertySortOrder.values().forEach { option ->
+                        FilterChip(
+                            selected = currentSort == option,
+                            onClick = { currentSort = option },
+                            label = { Text(option.shortLabel, fontSize = 12.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = OrangeAccent,
+                                selectedLabelColor = Color.White
+                            )
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
@@ -469,7 +585,7 @@ fun SearchScreen(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Apply Filters (${filteredList.size} Results)", fontWeight = FontWeight.Bold)
+                    Text("Apply Filters (${sortedList.size} Results)", fontWeight = FontWeight.Bold)
                 }
             }
         }
