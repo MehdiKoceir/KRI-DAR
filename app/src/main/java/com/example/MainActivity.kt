@@ -146,11 +146,13 @@ fun KriDarApp(repository: KriDarRepository) {
                     val targetProp = properties.firstOrNull { it.id == selectedPropertyId }
                     if (targetProp != null) {
                         val priceIntel = repository.getPriceIntelligence(targetProp.wilaya, targetProp.commune, targetProp.category)
+                        val propertyReviews by repository.getReviewsForProperty(targetProp.id).collectAsState(initial = emptyList())
 
                         PropertyDetailScreen(
                             property = targetProp,
                             isFavorite = favoriteIds.contains(targetProp.id),
                             priceIntel = priceIntel,
+                            reviews = propertyReviews,
                             onBackClick = { selectedPropertyId = null },
                             onFavoriteToggle = {
                                 coroutineScope.launch {
@@ -190,6 +192,20 @@ fun KriDarApp(repository: KriDarRepository) {
                                 }
                                 selectedPropertyId = null
                                 currentRoute = Screen.Favorites.route
+                            },
+                            onAddReview = { rating, comment, rentalPeriod, cleanliness, communication, accuracy, location ->
+                                coroutineScope.launch {
+                                    repository.addReview(
+                                        propertyId = targetProp.id,
+                                        rating = rating,
+                                        comment = comment,
+                                        rentalPeriod = rentalPeriod,
+                                        cleanliness = cleanliness,
+                                        communication = communication,
+                                        accuracy = accuracy,
+                                        location = location
+                                    )
+                                }
                             }
                         )
                     } else {
@@ -256,6 +272,7 @@ fun KriDarApp(repository: KriDarRepository) {
                                 properties = properties,
                                 favoriteIds = favoriteIds,
                                 initialQuery = searchQueryNav,
+                                repository = repository,
                                 onPropertyClick = { selectedPropertyId = it },
                                 onFavoriteToggle = { propId ->
                                     coroutineScope.launch {

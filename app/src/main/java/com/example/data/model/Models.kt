@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.io.Serializable
 
@@ -81,7 +82,16 @@ data class Wilaya(
     val communes: List<String>
 ) : Serializable
 
-@Entity(tableName = "properties")
+@Entity(
+    tableName = "properties",
+    indices = [
+        Index("landlordId"),
+        Index("wilaya"),
+        Index("category"),
+        Index("priceDzd"),
+        Index("createdAtTimestamp")
+    ]
+)
 data class Property(
     @PrimaryKey val id: String,
     val title: String,
@@ -127,7 +137,13 @@ data class Property(
     val createdAtTimestamp: Long = System.currentTimeMillis()
 ) : Serializable
 
-@Entity(tableName = "favorites")
+@Entity(
+    tableName = "favorites",
+    indices = [
+        Index(value = ["userId", "propertyId"], unique = true),
+        Index("userId")
+    ]
+)
 data class Favorite(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val userId: String,
@@ -135,7 +151,14 @@ data class Favorite(
     val addedTimestamp: Long = System.currentTimeMillis()
 )
 
-@Entity(tableName = "visits")
+@Entity(
+    tableName = "visits",
+    indices = [
+        Index("tenantId"),
+        Index("landlordId"),
+        Index("propertyId")
+    ]
+)
 data class VisitRequest(
     @PrimaryKey val id: String,
     val propertyId: String,
@@ -154,7 +177,14 @@ data class VisitRequest(
     val requestedAt: Long = System.currentTimeMillis()
 ) : Serializable
 
-@Entity(tableName = "conversations")
+@Entity(
+    tableName = "conversations",
+    indices = [
+        Index("tenantId"),
+        Index("landlordId"),
+        Index("propertyId")
+    ]
+)
 data class Conversation(
     @PrimaryKey val id: String,
     val propertyId: String,
@@ -172,7 +202,13 @@ data class Conversation(
     val updatedAtTimestamp: Long = System.currentTimeMillis()
 ) : Serializable
 
-@Entity(tableName = "messages")
+@Entity(
+    tableName = "messages",
+    indices = [
+        Index("conversationId"),
+        Index("timestampMs")
+    ]
+)
 data class Message(
     @PrimaryKey val id: String,
     val conversationId: String,
@@ -185,7 +221,12 @@ data class Message(
     val timestampMs: Long = System.currentTimeMillis()
 ) : Serializable
 
-@Entity(tableName = "saved_searches")
+@Entity(
+    tableName = "saved_searches",
+    indices = [
+        Index("userId")
+    ]
+)
 data class SavedSearch(
     @PrimaryKey val id: String,
     val userId: String,
@@ -199,7 +240,13 @@ data class SavedSearch(
     val createdAt: Long = System.currentTimeMillis()
 ) : Serializable
 
-@Entity(tableName = "reports")
+@Entity(
+    tableName = "reports",
+    indices = [
+        Index("propertyId"),
+        Index("reporterUserId")
+    ]
+)
 data class Report(
     @PrimaryKey val id: String,
     val propertyId: String,
@@ -211,7 +258,12 @@ data class Report(
     val createdAt: Long = System.currentTimeMillis()
 ) : Serializable
 
-@Entity(tableName = "verification_docs")
+@Entity(
+    tableName = "verification_docs",
+    indices = [
+        Index("userId")
+    ]
+)
 data class VerificationDoc(
     @PrimaryKey val id: String,
     val userId: String,
@@ -247,7 +299,13 @@ data class PropertyFilter(
     val isStudentFriendly: Boolean? = null
 )
 
-@Entity(tableName = "reviews")
+@Entity(
+    tableName = "reviews",
+    indices = [
+        Index("propertyId"),
+        Index("userId")
+    ]
+)
 data class PropertyReview(
     @PrimaryKey val id: String,
     val propertyId: String,

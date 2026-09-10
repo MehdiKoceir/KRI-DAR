@@ -102,6 +102,41 @@ class KriDarRepository(private val db: KriDarDatabase) {
         db.propertyDao().getPropertiesByPriceRange(minPrice, maxPrice)
 
     /**
+     * Executes reactive Room database query for marketplace filtering by:
+     * - rentalType (apartment, house, studio, room)
+     * - price range (minPrice, maxPrice in DZD)
+     * - city in Algeria (wilaya or commune)
+     * - optional search query and sort order
+     */
+    fun filterMarketplacePropertiesWithRoom(
+        city: String? = null,
+        minPrice: Double? = null,
+        maxPrice: Double? = null,
+        rentalType: String? = null,
+        searchQuery: String? = null,
+        sortOrder: String = "RECENT"
+    ): Flow<List<Property>> {
+        return when (sortOrder) {
+            "PRICE_ASC" -> db.propertyDao().filterMarketplacePropertiesPriceAsc(city, minPrice, maxPrice, rentalType, searchQuery)
+            "PRICE_DESC" -> db.propertyDao().filterMarketplacePropertiesPriceDesc(city, minPrice, maxPrice, rentalType, searchQuery)
+            else -> db.propertyDao().filterMarketplaceProperties(city, minPrice, maxPrice, rentalType, searchQuery)
+        }
+    }
+
+    /**
+     * Real-time Room count query matching active marketplace filters.
+     */
+    fun countMarketplacePropertiesWithRoom(
+        city: String? = null,
+        minPrice: Double? = null,
+        maxPrice: Double? = null,
+        rentalType: String? = null,
+        searchQuery: String? = null
+    ): Flow<Int> {
+        return db.propertyDao().countMarketplaceProperties(city, minPrice, maxPrice, rentalType, searchQuery)
+    }
+
+    /**
      * Search and filter properties using a structured [PropertyFilter] object.
      * Supports multi-criteria filtering: search query, location (wilaya/commune),
      * price range, property category, rental type, bedrooms, furnished, verified only, etc.
@@ -812,6 +847,113 @@ class KriDarRepository(private val db: KriDarDatabase) {
                 depositMonths = 2,
                 isFeatured = true,
                 viewsCount = 3890
+            ),
+            Property(
+                id = "prop_11_studio_oran",
+                title = "Studio Meublé Moderne avec Balcon à Oran",
+                description = "Charmant studio de 38 m² entièrement équipé avec coin cuisine, salle d'eau italienne et balcon avec vue dégagée. Situé en plein centre d'Oran, proche tramway et université.",
+                priceDzd = 38000.0,
+                category = PropertyCategory.STUDIO,
+                rentalType = RentalType.STUDENT,
+                wilaya = "Oran",
+                commune = "Oran Ville",
+                neighborhood = "Akid Lotfi",
+                latitude = 35.7050,
+                longitude = -0.6120,
+                surfaceM2 = 38,
+                bedrooms = 1,
+                bathrooms = 1,
+                totalRooms = 1,
+                floorLevel = 3,
+                imageResNames = listOf("img_property_oran_studio_1786376255934", "img_property_bab_ezzouar_f2_1786376266050"),
+                isFurnished = true,
+                hasParking = false,
+                hasElevator = true,
+                hasBalcony = true,
+                hasHeating = true,
+                hasAc = true,
+                hasInternet = true,
+                allowsPets = false,
+                isFamilyOnly = false,
+                isStudentFriendly = true,
+                landlordId = "landlord_karim",
+                landlordName = "Karim Ziani",
+                landlordVerification = VerificationStatus.VERIFIED,
+                isVerifiedProperty = true,
+                availableFrom = "Immediate",
+                depositMonths = 1,
+                viewsCount = 1760
+            ),
+            Property(
+                id = "prop_12_room_alger",
+                title = "Chambre Privée Meublée pour Étudiant à Bab Ezzouar",
+                description = "Chambre lumineuse de 18 m² en colocation calme avec salon et cuisine partagés. Wifi fibre, bureau de travail, lit confortable, à 5 minutes à pied de l'USTHB.",
+                priceDzd = 22000.0,
+                category = PropertyCategory.ROOM,
+                rentalType = RentalType.ROOM,
+                wilaya = "Alger",
+                commune = "Bab Ezzouar",
+                neighborhood = "Cité Universitaire",
+                latitude = 36.7190,
+                longitude = 3.1810,
+                surfaceM2 = 18,
+                bedrooms = 1,
+                bathrooms = 1,
+                totalRooms = 1,
+                floorLevel = 1,
+                imageResNames = listOf("img_property_bab_ezzouar_f2_1786376266050", "img_property_oran_studio_1786376255934"),
+                isFurnished = true,
+                hasParking = false,
+                hasElevator = false,
+                hasBalcony = false,
+                hasHeating = true,
+                hasAc = false,
+                hasInternet = true,
+                allowsPets = false,
+                isFamilyOnly = false,
+                isStudentFriendly = true,
+                landlordId = "landlord_karim",
+                landlordName = "Karim Ziani",
+                landlordVerification = VerificationStatus.VERIFIED,
+                isVerifiedProperty = true,
+                availableFrom = "Immediate",
+                depositMonths = 1,
+                viewsCount = 2890
+            ),
+            Property(
+                id = "prop_13_house_constantine",
+                title = "Maison Familiale R+1 avec Cour à Constantine",
+                description = "Belle maison individuelle de 180 m² avec cour intérieure arborée et garage privé. 4 chambres, grand salon traditionnel, cuisine spacieuse, quartier calme et sécurisé à Zouaghi.",
+                priceDzd = 78000.0,
+                category = PropertyCategory.HOUSE,
+                rentalType = RentalType.FAMILY,
+                wilaya = "Constantine",
+                commune = "Constantine",
+                neighborhood = "Zouaghi Slimane",
+                latitude = 36.3210,
+                longitude = 6.6180,
+                surfaceM2 = 180,
+                bedrooms = 4,
+                bathrooms = 2,
+                totalRooms = 5,
+                floorLevel = 0,
+                imageResNames = listOf("img_property_blida_villa_1786376241704", "img_property_algiers_f3_1786376194767"),
+                isFurnished = false,
+                hasParking = true,
+                hasElevator = false,
+                hasBalcony = true,
+                hasHeating = true,
+                hasAc = true,
+                hasInternet = true,
+                allowsPets = true,
+                isFamilyOnly = true,
+                landlordId = "landlord_ahmed",
+                landlordName = "Ahmed Benali",
+                landlordVerification = VerificationStatus.VERIFIED,
+                isVerifiedProperty = true,
+                availableFrom = "01 Octobre 2026",
+                depositMonths = 2,
+                viewsCount = 2150
             )
         )
         db.propertyDao().insertProperties(properties)

@@ -27,6 +27,125 @@ interface PropertyDao {
     @Query("SELECT * FROM properties WHERE isPaused = 0 AND priceDzd >= :minPrice AND priceDzd <= :maxPrice ORDER BY priceDzd ASC")
     fun getPropertiesByPriceRange(minPrice: Double, maxPrice: Double): Flow<List<Property>>
 
+    @Query("""
+        SELECT * FROM properties 
+        WHERE isPaused = 0
+          AND (:city IS NULL OR :city = '' OR :city = 'Toutes les villes' OR :city = 'All' OR wilaya LIKE '%' || :city || '%' OR commune LIKE '%' || :city || '%')
+          AND (:minPrice IS NULL OR priceDzd >= :minPrice)
+          AND (:maxPrice IS NULL OR priceDzd <= :maxPrice)
+          AND (
+              :rentalType IS NULL OR :rentalType = '' OR :rentalType = 'ALL' OR
+              (:rentalType = 'APARTMENT' AND category IN ('APARTMENT', 'F1', 'F2', 'F3', 'F4', 'F5')) OR
+              (:rentalType = 'HOUSE' AND category IN ('HOUSE', 'VILLA', 'DUPLEX')) OR
+              (:rentalType = 'STUDIO' AND category IN ('STUDIO', 'F1')) OR
+              (:rentalType = 'ROOM' AND (category = 'ROOM' OR rentalType = 'ROOM')) OR
+              category = :rentalType
+          )
+          AND (:query IS NULL OR :query = '' OR 
+               title LIKE '%' || :query || '%' OR 
+               description LIKE '%' || :query || '%' OR 
+               commune LIKE '%' || :query || '%' OR 
+               wilaya LIKE '%' || :query || '%' OR 
+               neighborhood LIKE '%' || :query || '%')
+        ORDER BY createdAtTimestamp DESC
+    """)
+    fun filterMarketplaceProperties(
+        city: String?,
+        minPrice: Double?,
+        maxPrice: Double?,
+        rentalType: String?,
+        query: String?
+    ): Flow<List<Property>>
+
+    @Query("""
+        SELECT * FROM properties 
+        WHERE isPaused = 0
+          AND (:city IS NULL OR :city = '' OR :city = 'Toutes les villes' OR :city = 'All' OR wilaya LIKE '%' || :city || '%' OR commune LIKE '%' || :city || '%')
+          AND (:minPrice IS NULL OR priceDzd >= :minPrice)
+          AND (:maxPrice IS NULL OR priceDzd <= :maxPrice)
+          AND (
+              :rentalType IS NULL OR :rentalType = '' OR :rentalType = 'ALL' OR
+              (:rentalType = 'APARTMENT' AND category IN ('APARTMENT', 'F1', 'F2', 'F3', 'F4', 'F5')) OR
+              (:rentalType = 'HOUSE' AND category IN ('HOUSE', 'VILLA', 'DUPLEX')) OR
+              (:rentalType = 'STUDIO' AND category IN ('STUDIO', 'F1')) OR
+              (:rentalType = 'ROOM' AND (category = 'ROOM' OR rentalType = 'ROOM')) OR
+              category = :rentalType
+          )
+          AND (:query IS NULL OR :query = '' OR 
+               title LIKE '%' || :query || '%' OR 
+               description LIKE '%' || :query || '%' OR 
+               commune LIKE '%' || :query || '%' OR 
+               wilaya LIKE '%' || :query || '%' OR 
+               neighborhood LIKE '%' || :query || '%')
+        ORDER BY priceDzd ASC
+    """)
+    fun filterMarketplacePropertiesPriceAsc(
+        city: String?,
+        minPrice: Double?,
+        maxPrice: Double?,
+        rentalType: String?,
+        query: String?
+    ): Flow<List<Property>>
+
+    @Query("""
+        SELECT * FROM properties 
+        WHERE isPaused = 0
+          AND (:city IS NULL OR :city = '' OR :city = 'Toutes les villes' OR :city = 'All' OR wilaya LIKE '%' || :city || '%' OR commune LIKE '%' || :city || '%')
+          AND (:minPrice IS NULL OR priceDzd >= :minPrice)
+          AND (:maxPrice IS NULL OR priceDzd <= :maxPrice)
+          AND (
+              :rentalType IS NULL OR :rentalType = '' OR :rentalType = 'ALL' OR
+              (:rentalType = 'APARTMENT' AND category IN ('APARTMENT', 'F1', 'F2', 'F3', 'F4', 'F5')) OR
+              (:rentalType = 'HOUSE' AND category IN ('HOUSE', 'VILLA', 'DUPLEX')) OR
+              (:rentalType = 'STUDIO' AND category IN ('STUDIO', 'F1')) OR
+              (:rentalType = 'ROOM' AND (category = 'ROOM' OR rentalType = 'ROOM')) OR
+              category = :rentalType
+          )
+          AND (:query IS NULL OR :query = '' OR 
+               title LIKE '%' || :query || '%' OR 
+               description LIKE '%' || :query || '%' OR 
+               commune LIKE '%' || :query || '%' OR 
+               wilaya LIKE '%' || :query || '%' OR 
+               neighborhood LIKE '%' || :query || '%')
+        ORDER BY priceDzd DESC
+    """)
+    fun filterMarketplacePropertiesPriceDesc(
+        city: String?,
+        minPrice: Double?,
+        maxPrice: Double?,
+        rentalType: String?,
+        query: String?
+    ): Flow<List<Property>>
+
+    @Query("""
+        SELECT COUNT(*) FROM properties 
+        WHERE isPaused = 0
+          AND (:city IS NULL OR :city = '' OR :city = 'Toutes les villes' OR :city = 'All' OR wilaya LIKE '%' || :city || '%' OR commune LIKE '%' || :city || '%')
+          AND (:minPrice IS NULL OR priceDzd >= :minPrice)
+          AND (:maxPrice IS NULL OR priceDzd <= :maxPrice)
+          AND (
+              :rentalType IS NULL OR :rentalType = '' OR :rentalType = 'ALL' OR
+              (:rentalType = 'APARTMENT' AND category IN ('APARTMENT', 'F1', 'F2', 'F3', 'F4', 'F5')) OR
+              (:rentalType = 'HOUSE' AND category IN ('HOUSE', 'VILLA', 'DUPLEX')) OR
+              (:rentalType = 'STUDIO' AND category IN ('STUDIO', 'F1')) OR
+              (:rentalType = 'ROOM' AND (category = 'ROOM' OR rentalType = 'ROOM')) OR
+              category = :rentalType
+          )
+          AND (:query IS NULL OR :query = '' OR 
+               title LIKE '%' || :query || '%' OR 
+               description LIKE '%' || :query || '%' OR 
+               commune LIKE '%' || :query || '%' OR 
+               wilaya LIKE '%' || :query || '%' OR 
+               neighborhood LIKE '%' || :query || '%')
+    """)
+    fun countMarketplaceProperties(
+        city: String?,
+        minPrice: Double?,
+        maxPrice: Double?,
+        rentalType: String?,
+        query: String?
+    ): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProperty(property: Property)
 
